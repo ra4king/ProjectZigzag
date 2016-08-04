@@ -15,10 +15,6 @@ public class GameScreen extends GameWorld {
 		super.init(game);
 		
 		setBackground(Color.BLACK);
-	}
-	
-	@Override
-	public void show() {
 		add(new Player());
 	}
 	

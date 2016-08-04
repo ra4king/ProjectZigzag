@@ -20,20 +20,20 @@ public class ProjectZigzag extends Game {
 	public static final String GAME_SCREEN = "Game";
 	
 	public ProjectZigzag() {
-		super(1280, 800);
+		super(600, 800);
 	}
 	
 	@Override
 	protected void initGame() {
 		MenuPage mainMenu = new MenuPage();
-		mainMenu.add(new Button("Play!", 12, getWidth() / 2, getHeight() / 2, 5, 5, true, button -> {
-			setScreen(GAME_SCREEN);
-		}));
+		mainMenu.add(new Button("Play!", 20, getWidth() / 2, getHeight() / 2, 5, 5, true, button -> setScreen(GAME_SCREEN)));
 		
 		Menus menus = new Menus();
 		menus.addPage(MAIN_MENU_SCREEN, mainMenu);
 		
-		setScreen(MENUS_SCREEN, menus);
+		addScreen(MENUS_SCREEN, menus);
 		addScreen(GAME_SCREEN, new GameScreen());
+		
+		setScreen(MENUS_SCREEN);
 	}
 }
