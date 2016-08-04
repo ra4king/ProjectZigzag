@@ -1,6 +1,9 @@
 package com.rja.projectzigzag;
 
 import com.ra4king.gameutils.Game;
+import com.ra4king.gameutils.gui.Button;
+import com.ra4king.gameutils.gui.MenuPage;
+import com.ra4king.gameutils.gui.Menus;
 
 /**
  * @author Roi Atalla
@@ -12,7 +15,9 @@ public class ProjectZigzag extends Game {
 		game.start();
 	}
 	
-	private static final String MAIN_MENU_SCREEN = "MainMenu";
+	public static final String MENUS_SCREEN = "Menus";
+	public static final String MAIN_MENU_SCREEN = "MainMenu";
+	public static final String GAME_SCREEN = "Game";
 	
 	public ProjectZigzag() {
 		super(1280, 800);
@@ -20,6 +25,15 @@ public class ProjectZigzag extends Game {
 	
 	@Override
 	protected void initGame() {
-		setScreen(MAIN_MENU_SCREEN, new MainMenuScreen());
+		MenuPage mainMenu = new MenuPage();
+		mainMenu.add(new Button("Play!", 12, getWidth() / 2, getHeight() / 2, 5, 5, true, button -> {
+			setScreen(GAME_SCREEN);
+		}));
+		
+		Menus menus = new Menus();
+		menus.addPage(MAIN_MENU_SCREEN, mainMenu);
+		
+		setScreen(MENUS_SCREEN, menus);
+		addScreen(GAME_SCREEN, new GameScreen());
 	}
 }
