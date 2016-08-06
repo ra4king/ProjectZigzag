@@ -3,18 +3,23 @@ package com.rja.projectzigzag.entities;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.ra4king.gameutils.Entity;
 import com.ra4king.gameutils.Input;
+import com.ra4king.gameutils.gameworld.GameComponent;
 
 /**
  * @author Roi Atalla
  */
-public class Player extends Entity {
-	private double velocity;
+public class Player extends GameComponent {
 	private static final double MAX_VELOCITY = 15;
 	private static final double ACCELERATION = -15;
 	private static final double GRAVITY = 5;
+	
+	private double velocity;
+	
+	private List<BoostCharge> boostOwned = new ArrayList<>();
 	
 	private enum BoostStatus {
 		NO_BOOST, BOOST_UP, BOOST_DOWN
@@ -38,13 +43,16 @@ public class Player extends Entity {
 		
 		double fraction = deltaTime / 1e9;
 		
+		double acceleration = ACCELERATION;
+		acceleration -= boostOwned.stream().mapToDouble(BoostCharge::getBoostValue).sum();
+		
 		boostStatus = BoostStatus.NO_BOOST;
 		if(input.isKeyDown(KeyEvent.VK_UP)) {
-			velocity += ACCELERATION * fraction;
+			velocity += acceleration * fraction;
 			boostStatus = BoostStatus.BOOST_UP;
 		}
 		if(input.isKeyDown(KeyEvent.VK_DOWN)) {
-			velocity -= ACCELERATION * fraction;
+			velocity -= acceleration * fraction;
 			boostStatus = BoostStatus.BOOST_DOWN;
 		}
 		
@@ -67,6 +75,12 @@ public class Player extends Entity {
 		}
 		
 		setX(getX() < 0 ? 0 : getX() + getWidth() > width ? width - getWidth() : getX());
+		
+		getParent().getEntities().stream().filter(entity -> entity instanceof BoostCharge && entity.intersects(this)).forEach(entity ->  {
+			BoostCharge boost = (BoostCharge)entity;
+			boostOwned.add(boost);
+			getParent().remove(boost);
+		});
 	}
 	
 	@Override
