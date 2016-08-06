@@ -27,7 +27,6 @@ public class ProjectZigzag extends Game {
 	protected void initGame() {
 		MenuPage mainMenu = new MenuPage();
 		mainMenu.add(new Button("Play!", 20, getWidth() / 2, getHeight() / 2, 5, 5, true, button -> setScreen(GAME_SCREEN)));
-		
 		Menus menus = new Menus();
 		menus.addPage(MAIN_MENU_SCREEN, mainMenu);
 		

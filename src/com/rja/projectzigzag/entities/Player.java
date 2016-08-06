@@ -73,14 +73,14 @@ public class Player extends Entity {
 	public void draw(Graphics2D g) {
 		if(boostStatus != BoostStatus.NO_BOOST) {
 			for(int i = 0; i < 20; i++) {
-				int x = (int)Math.round(getX() - 2.0 + (getWidth() - 8.0) * Math.random());
+				int size = (int)Math.round(5.0 + 20.0 * Math.random());
+				int x = (int)Math.round(getX() - size * 0.5 + (getWidth()) * Math.random());
 				int y;
 				if(boostStatus == BoostStatus.BOOST_UP) {
-					y = (int)Math.round(getY() + getHeight() - 5.0 + 15.0 * Math.random());
+					y = (int)Math.round(getY() + getHeight() - size * 0.5 + 15.0 * Math.random());
 				} else {
 					y = (int)Math.round(getY() - 5.0 - 15.0 * Math.random());
 				}
-				int size = (int)Math.round(2.0 + 10.0 * Math.random());
 				
 				Color color = Color.ORANGE;
 				for(int j = 0; j < (int)Math.round(5 * Math.random()); j++) {
