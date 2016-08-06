@@ -12,9 +12,9 @@ import com.ra4king.gameutils.Input;
  */
 public class Player extends Entity {
 	private double velocity;
-	private static final double MAX_VELOCITY = 15;
-	private static final double ACCELERATION = -15;
-	private static final double GRAVITY = 5;
+	private static final double MAX_VELOCITY = 5;
+	private static final double ACCELERATION = -3;
+	private static final double GRAVITY = 1;
 	
 	private enum BoostStatus {
 		NO_BOOST, BOOST_UP, BOOST_DOWN
@@ -36,26 +36,23 @@ public class Player extends Entity {
 	public void update(long deltaTime) {
 		Input input = getParent().getGame().getInput();
 		
-		double fraction = deltaTime / 1e9;
-		
-		boostStatus = BoostStatus.NO_BOOST;
+//		boostStatus = BoostStatus.NO_BOOST;
 		if(input.isKeyDown(KeyEvent.VK_UP)) {
-			velocity += ACCELERATION * fraction;
 			boostStatus = BoostStatus.BOOST_UP;
 		}
 		if(input.isKeyDown(KeyEvent.VK_DOWN)) {
-			velocity -= ACCELERATION * fraction;
 			boostStatus = BoostStatus.BOOST_DOWN;
 		}
-		
+
+		calculateBoostEffect(deltaTime);
+
 		if(input.isKeyDown(KeyEvent.VK_RIGHT)) {
 			setX(getX() + 2);
 		}
 		if(input.isKeyDown(KeyEvent.VK_LEFT)) {
 			setX(getX() - 2);
 		}
-		
-		velocity += GRAVITY * fraction;
+
 		velocity = velocity > MAX_VELOCITY ? MAX_VELOCITY : velocity < -MAX_VELOCITY ? -MAX_VELOCITY : velocity;
 		setY(getY() + velocity);
 		
@@ -67,6 +64,18 @@ public class Player extends Entity {
 		}
 		
 		setX(getX() < 0 ? 0 : getX() + getWidth() > width ? width - getWidth() : getX());
+	}
+
+	private void calculateBoostEffect(long deltaTime){
+		double fraction = deltaTime / 1e9;
+
+		if(boostStatus == BoostStatus.BOOST_UP) {
+			velocity += ACCELERATION * fraction;
+		}
+		if(boostStatus == BoostStatus.BOOST_DOWN) {
+			velocity -= ACCELERATION * fraction;
+		}
+		velocity += GRAVITY * fraction;
 	}
 	
 	@Override
