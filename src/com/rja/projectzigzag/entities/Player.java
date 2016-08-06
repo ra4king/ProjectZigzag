@@ -13,9 +13,9 @@ import com.ra4king.gameutils.gameworld.GameComponent;
  * @author Roi Atalla
  */
 public class Player extends GameComponent {
-	private static final double MAX_VELOCITY = 15;
-	private static final double ACCELERATION = -15;
-	private static final double GRAVITY = 5;
+	private static final double MAX_VELOCITY = 5;
+	private static final double ACCELERATION = -3;
+	private static final double GRAVITY = 1;
 	
 	private double velocity;
 	
@@ -55,15 +55,16 @@ public class Player extends GameComponent {
 			velocity -= acceleration * fraction;
 			boostStatus = BoostStatus.BOOST_DOWN;
 		}
-		
+
+		calculateBoostEffect(deltaTime);
+
 		if(input.isKeyDown(KeyEvent.VK_RIGHT)) {
 			setX(getX() + 2);
 		}
 		if(input.isKeyDown(KeyEvent.VK_LEFT)) {
 			setX(getX() - 2);
 		}
-		
-		velocity += GRAVITY * fraction;
+
 		velocity = velocity > MAX_VELOCITY ? MAX_VELOCITY : velocity < -MAX_VELOCITY ? -MAX_VELOCITY : velocity;
 		setY(getY() + velocity);
 		
@@ -81,6 +82,18 @@ public class Player extends GameComponent {
 			boostOwned.add(boost);
 			getParent().remove(boost);
 		});
+	}
+
+	private void calculateBoostEffect(long deltaTime){
+		double fraction = deltaTime / 1e9;
+
+		if(boostStatus == BoostStatus.BOOST_UP) {
+			velocity += ACCELERATION * fraction;
+		}
+		if(boostStatus == BoostStatus.BOOST_DOWN) {
+			velocity -= ACCELERATION * fraction;
+		}
+		velocity += GRAVITY * fraction;
 	}
 	
 	@Override
