@@ -7,13 +7,13 @@ import java.awt.event.KeyEvent;
 import com.ra4king.gameutils.Input;
 import com.ra4king.gameutils.gameworld.GameComponent;
 import com.ra4king.gameutils.gameworld.GameWorld;
+import com.rja.projectzigzag.Constants;
 
 /**
  * @author Roi Atalla
  */
 public class Player extends GameComponent {
 	private static final double ACCELERATION = 2.5;
-	private static final double GRAVITY = 1;
 	private static final double BOOSTER_ACCELERATION = 2.5;
 
 	private double deathProgress;
@@ -101,12 +101,19 @@ public class Player extends GameComponent {
 
 			setX(getX() < 0 ? 0 : getX() + getWidth() > width ? width - getWidth() : getX());
 
-			getParent().getEntities().stream().filter(entity -> entity instanceof BoostCharge && entity.intersects(this)).forEach(entity ->  {
-				BoostCharge boost = (BoostCharge)entity;
+			getParent().registerCollision(this, BoostCharge.class, (boost) ->  {
 				booster.updateFuel(boost.getBoostAmount());
 				lifeForce++;
 				getParent().remove(boost);
 			});
+
+			if(getY() < Constants.OFFSET_LIMIT) {
+				double delta = Constants.OFFSET_LIMIT - getY();
+				getParent().getEntities().forEach(entity -> entity.setY(entity.getY() + delta));
+			} else if(getY() > getParent().getHeight() - Constants.OFFSET_LIMIT) {
+				double delta = getParent().getHeight() - Constants.OFFSET_LIMIT - getY();
+				getParent().getEntities().forEach(entity -> entity.setY(entity.getY() + delta));
+			}
 		} else {
 			deathProgress++;
 		}
@@ -129,7 +136,7 @@ public class Player extends GameComponent {
 		if(directionStatus == DirectionStatus.DOWN) {
 			acceleration -= (ACCELERATION + boosterAcceleration);
 		}
-		acceleration -= GRAVITY;
+		acceleration -= Constants.GRAVITY;
 		return -acceleration;
 	}
 
