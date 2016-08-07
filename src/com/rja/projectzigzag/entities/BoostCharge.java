@@ -9,15 +9,15 @@ import com.ra4king.gameutils.gameworld.GameComponent;
  * @author Roi Atalla
  */
 public class BoostCharge extends GameComponent {
-	private double boostValue;
+	private double boostAmount;
 	
-	public BoostCharge(double x, double y, double boostValue) {
+	public BoostCharge(double x, double y, double boostAmount) {
 		super(x, y, 15, 15);
-		this.boostValue = boostValue;
+		this.boostAmount = boostAmount;
 	}
 	
-	public double getBoostValue() {
-		return boostValue;
+	public double getBoostAmount() {
+		return boostAmount;
 	}
 	
 	@Override

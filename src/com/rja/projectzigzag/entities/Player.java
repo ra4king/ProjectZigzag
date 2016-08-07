@@ -3,32 +3,43 @@ package com.rja.projectzigzag.entities;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.ra4king.gameutils.Input;
 import com.ra4king.gameutils.gameworld.GameComponent;
+import com.ra4king.gameutils.gameworld.GameWorld;
 
 /**
  * @author Roi Atalla
  */
 public class Player extends GameComponent {
-	private static final double MAX_VELOCITY = 5;
-	private static final double ACCELERATION = -3;
+	private static final double ACCELERATION = 2.5;
 	private static final double GRAVITY = 1;
-	
+	private static final double BOOSTER_ACCELERATION = 2.5;
+
+	private double time;
 	private double velocity;
 	
-	private List<BoostCharge> boostOwned = new ArrayList<>();
+	private Booster booster = new Booster(BOOSTER_ACCELERATION);
 	
+	private enum DirectionStatus {
+		UP, DOWN
+	}
+
 	private enum BoostStatus {
-		NO_BOOST, BOOST_UP, BOOST_DOWN
+		OFF, ON
 	}
 	
-	private BoostStatus boostStatus = BoostStatus.NO_BOOST;
+	private DirectionStatus directionStatus = DirectionStatus.UP;
+	private BoostStatus boostStatus = BoostStatus.OFF;
 	
 	public Player() {
 		super(0, 0, 20, 60);
+	}
+
+	@Override
+	public final void init(GameWorld screen) {
+		super.init(screen);
+		getParent().add(booster);
 	}
 	
 	@Override
@@ -42,21 +53,22 @@ public class Player extends GameComponent {
 		Input input = getParent().getGame().getInput();
 		
 		double fraction = deltaTime / 1e9;
-		
-		double acceleration = ACCELERATION;
-		acceleration -= boostOwned.stream().mapToDouble(BoostCharge::getBoostValue).sum();
-		
-		boostStatus = BoostStatus.NO_BOOST;
+		time += fraction;
+
+		boostStatus = BoostStatus.OFF;
 		if(input.isKeyDown(KeyEvent.VK_UP)) {
-			velocity += acceleration * fraction;
-			boostStatus = BoostStatus.BOOST_UP;
+			directionStatus = DirectionStatus.UP;
 		}
 		if(input.isKeyDown(KeyEvent.VK_DOWN)) {
-			velocity -= acceleration * fraction;
-			boostStatus = BoostStatus.BOOST_DOWN;
+			directionStatus = DirectionStatus.DOWN;
+		}
+		if(input.isKeyDown(KeyEvent.VK_1)) {
+			boostStatus = BoostStatus.ON;
+			booster.setEnabled();
+			booster.updateFuel(-fraction);
 		}
 
-		calculateBoostEffect(deltaTime);
+		applyAcceleration(deltaTime);
 
 		if(input.isKeyDown(KeyEvent.VK_RIGHT)) {
 			setX(getX() + 2);
@@ -65,7 +77,7 @@ public class Player extends GameComponent {
 			setX(getX() - 2);
 		}
 
-		velocity = velocity > MAX_VELOCITY ? MAX_VELOCITY : velocity < -MAX_VELOCITY ? -MAX_VELOCITY : velocity;
+		velocity = velocity > getMaxVelocity() ? getMaxVelocity() : velocity < -getMaxVelocity() ? -getMaxVelocity() : velocity;
 		setY(getY() + velocity);
 		
 		int width = getParent().getGame().getWidth();
@@ -79,47 +91,62 @@ public class Player extends GameComponent {
 		
 		getParent().getEntities().stream().filter(entity -> entity instanceof BoostCharge && entity.intersects(this)).forEach(entity ->  {
 			BoostCharge boost = (BoostCharge)entity;
-			boostOwned.add(boost);
+			booster.updateFuel(boost.getBoostAmount());
 			getParent().remove(boost);
 		});
 	}
 
-	private void calculateBoostEffect(long deltaTime){
+	private void applyAcceleration(long deltaTime){
 		double fraction = deltaTime / 1e9;
+		velocity += getAcceleration() * fraction;
+	}
 
-		if(boostStatus == BoostStatus.BOOST_UP) {
-			velocity += ACCELERATION * fraction;
+	private double getAcceleration() {
+		double acceleration = 0;
+		double boosterAcceleration = 0;
+		if(boostStatus == BoostStatus.ON) {
+			boosterAcceleration = booster.getAcceleration();
 		}
-		if(boostStatus == BoostStatus.BOOST_DOWN) {
-			velocity -= ACCELERATION * fraction;
+		if(directionStatus == DirectionStatus.UP) {
+			acceleration += (ACCELERATION + boosterAcceleration);
 		}
-		velocity += GRAVITY * fraction;
+		if(directionStatus == DirectionStatus.DOWN) {
+			acceleration -= (ACCELERATION + boosterAcceleration);
+		}
+		acceleration -= GRAVITY;
+		return -acceleration;
+	}
+
+	private double getMaxVelocity() {
+		return Math.sqrt(Math.abs(getAcceleration()));
 	}
 	
 	@Override
 	public void draw(Graphics2D g) {
-		if(boostStatus != BoostStatus.NO_BOOST) {
-			for(int i = 0; i < 20; i++) {
-				int size = (int)Math.round(5.0 + 20.0 * Math.random());
-				int x = (int)Math.round(getX() - size * 0.5 + (getWidth()) * Math.random());
-				int y;
-				if(boostStatus == BoostStatus.BOOST_UP) {
-					y = (int)Math.round(getY() + getHeight() - size * 0.5 + 15.0 * Math.random());
-				} else {
-					y = (int)Math.round(getY() - 5.0 - 15.0 * Math.random());
-				}
-				
-				Color color = Color.ORANGE;
-				for(int j = 0; j < (int)Math.round(5 * Math.random()); j++) {
-					color = color.darker();
-				}
-				
-				g.setColor(color);
-				g.fillOval(x, y, size, size);
+		for(int i = 0; i < 20; i++) {
+			int size = (int)Math.round(5.0 + 20.0 * Math.random());
+			int x = (int)Math.round(getX() - size * 0.5 + (getWidth()) * Math.random());
+			int y;
+			if(directionStatus == DirectionStatus.UP) {
+				y = (int)Math.round(getY() + getHeight() - size * 0.5 + 15.0 * Math.random());
+			} else {
+				y = (int)Math.round(getY() - 5.0 - 15.0 * Math.random());
 			}
+
+			Color color = Color.ORANGE;
+			for(int j = 0; j < (int)Math.round(5 * Math.random()); j++) {
+				color = color.darker();
+			}
+
+			g.setColor(color);
+			g.fillOval(x, y, size, size);
 		}
 		
 		g.setColor(Color.WHITE);
 		g.fillRect(getIntX(), getIntY(), getIntWidth(), getIntHeight());
+
+		g.drawString("ACCELERATION: " + String.format("%.02f", getAcceleration()), 5, 25);
+		g.drawString("MAX VELOCITY: " + String.format("%.02f", getMaxVelocity()), 5, 35);
+		g.drawString("TIME: " + String.format("%.02f", time), 5, 45);
 	}
 }
