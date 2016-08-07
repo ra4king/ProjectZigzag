@@ -1,5 +1,6 @@
 package com.rja.projectzigzag;
 
+import java.awt.Color;
 import java.util.Random;
 
 import com.ra4king.gameutils.Game;
@@ -19,7 +20,7 @@ public class GameScreen extends GameWorld {
 	public void init(Game game) {
 		super.init(game);
 
-		setBackground(java.awt.Color.BLUE.darker());
+		setBackground(Color.BLACK);
 		
 		add(0, new BackgroundStars());
 		add(1, new Player());
