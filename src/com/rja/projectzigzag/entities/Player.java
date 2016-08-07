@@ -16,7 +16,7 @@ public class Player extends GameComponent {
 	private static final double GRAVITY = 1;
 	private static final double BOOSTER_ACCELERATION = 2.5;
 
-	private double time;
+	private long time;
 	private double velocity;
 	
 	private Booster booster = new Booster(BOOSTER_ACCELERATION);
@@ -44,16 +44,16 @@ public class Player extends GameComponent {
 	
 	@Override
 	public void show() {
-		setX((getParent().getGame().getWidth() - getWidth()) / 2.0);
-		setY((getParent().getGame().getHeight() - getHeight()) / 2.0);
+		setX((getParent().getWidth() - getWidth()) / 2.0);
+		setY((getParent().getHeight() - getHeight()) / 2.0);
 	}
 	
 	@Override
 	public void update(long deltaTime) {
 		Input input = getParent().getGame().getInput();
 		
+		time += deltaTime;
 		double fraction = deltaTime / 1e9;
-		time += fraction;
 
 		boostStatus = BoostStatus.OFF;
 		if(input.isKeyDown(KeyEvent.VK_UP)) {
@@ -77,7 +77,8 @@ public class Player extends GameComponent {
 			setX(getX() - 2);
 		}
 
-		velocity = velocity > getMaxVelocity() ? getMaxVelocity() : velocity < -getMaxVelocity() ? -getMaxVelocity() : velocity;
+		double maxVelocity = getMaxVelocity();
+		velocity = velocity > maxVelocity ? maxVelocity : velocity < -maxVelocity ? -maxVelocity: velocity;
 		setY(getY() + velocity);
 		
 		int width = getParent().getGame().getWidth();
@@ -124,13 +125,14 @@ public class Player extends GameComponent {
 	@Override
 	public void draw(Graphics2D g) {
 		for(int i = 0; i < 20; i++) {
-			int size = (int)Math.round(5.0 + 20.0 * Math.random());
+			int size = (int)Math.round(5.0 + (boostStatus == BoostStatus.ON ? 20.0 : 5.0) * Math.random());
 			int x = (int)Math.round(getX() - size * 0.5 + (getWidth()) * Math.random());
 			int y;
+			double ydist = boostStatus == BoostStatus.ON ? 15.0 : 10.0;
 			if(directionStatus == DirectionStatus.UP) {
-				y = (int)Math.round(getY() + getHeight() - size * 0.5 + 15.0 * Math.random());
+				y = (int)Math.round(getY() + getHeight() - size * 0.5 + ydist * Math.random());
 			} else {
-				y = (int)Math.round(getY() - 5.0 - 15.0 * Math.random());
+				y = (int)Math.round(getY() - size * 0.5 - ydist * Math.random());
 			}
 
 			Color color = Color.ORANGE;
@@ -147,6 +149,6 @@ public class Player extends GameComponent {
 
 		g.drawString("ACCELERATION: " + String.format("%.02f", getAcceleration()), 5, 25);
 		g.drawString("MAX VELOCITY: " + String.format("%.02f", getMaxVelocity()), 5, 35);
-		g.drawString("TIME: " + String.format("%.02f", time), 5, 45);
+		g.drawString("TIME: " + String.format("%.02f", time / 1e9), 5, 45);
 	}
 }
