@@ -104,8 +104,11 @@ public class Player extends GameComponent {
 			getParent().getEntities().stream().filter(entity -> entity instanceof BoostCharge && entity.intersects(this)).forEach(entity ->  {
 				BoostCharge boost = (BoostCharge)entity;
 				booster.updateFuel(boost.getBoostAmount());
+				lifeForce++;
 				getParent().remove(boost);
 			});
+		} else {
+			deathProgress++;
 		}
 	}
 
@@ -161,9 +164,9 @@ public class Player extends GameComponent {
 			g.fillRect(getIntX(), getIntY(), getIntWidth(), getIntHeight());
 		} else if(deathProgress < 100) {
 			for (int i = 0; i < 20; i++) {
-				int size = (int) Math.round(5.0 + (-Math.abs(deathProgress - 50) + 50) * 3 *Math.random());
-				int x = (int) (getX() + size * 2 * Math.random());
-				int y = (int) (getY() + size * 2 * Math.random());
+				int size = (int) Math.round(5.0 + (-Math.abs((deathProgress / 10) - 5) + 5) * 3 *Math.random());
+				int x = (int) (getX() + size * Math.random());
+				int y = (int) (getY() + size * Math.random());
 
 				Color color = Color.ORANGE;
 				for (int j = 0; j < (int) Math.round(5 * Math.random()); j++) {
