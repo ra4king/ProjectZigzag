@@ -21,7 +21,9 @@ public class Booster extends GameComponent {
         return acceleration;
     }
 
-    public void updateFuel(double newFuel) { fuel += newFuel; }
+    public boolean hasFuel() {return fuel > 0; }
+
+    public void updateFuel(double newFuel) { fuel = fuel + newFuel > 0 ? fuel + newFuel : 0; }
 
     public void setEnabled () { isEnabled = true; }
 
@@ -37,7 +39,7 @@ public class Booster extends GameComponent {
         } else {
             g.setColor(Color.WHITE);
         }
-        g.drawString("BOOSTER FUEL: " + String.format("%.02f", fuel), 5, 15);
+        g.drawString("BOOSTER FUEL: " + String.format("%.02f", fuel), 5, 25);
         isEnabled = false;
     }
 }
