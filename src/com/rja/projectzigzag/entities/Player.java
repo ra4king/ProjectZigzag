@@ -12,12 +12,14 @@ import com.ra4king.gameutils.gameworld.GameWorld;
  * @author Roi Atalla
  */
 public class Player extends GameComponent {
+	private static final double OFFSET_LIMIT = 100.0;
 	private static final double ACCELERATION = 2.5;
 	private static final double GRAVITY = 1;
 	private static final double BOOSTER_ACCELERATION = 2.5;
 
 	private long time;
 	private double velocity;
+	private double offset;
 	
 	private Booster booster = new Booster(BOOSTER_ACCELERATION);
 	
@@ -95,6 +97,14 @@ public class Player extends GameComponent {
 			booster.updateFuel(boost.getBoostAmount());
 			getParent().remove(boost);
 		});
+		
+		if(getY() < OFFSET_LIMIT) {
+			double delta = OFFSET_LIMIT - getY();
+			getParent().getEntities().forEach(entity -> entity.setY(entity.getY() + delta));
+		} else if(getY() > getParent().getHeight() - OFFSET_LIMIT) {
+			double delta = getParent().getHeight() - OFFSET_LIMIT - getY();
+			getParent().getEntities().forEach(entity -> entity.setY(entity.getY() + delta));
+		}
 	}
 
 	private void applyAcceleration(long deltaTime){
